@@ -31,7 +31,7 @@ class HTMLNode:
         result = ""
         if self.props is not None:
             for key in self.props.keys():
-                result += f" {key}='{self.props[key]}'"
+                result += f' {key}="{self.props[key]}"'
             return result
         else:
             return ""
