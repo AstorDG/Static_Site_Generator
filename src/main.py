@@ -26,8 +26,8 @@ def generate_page(
     title = extract_title(markdown_file)
     filled_in_template = template_file.replace("{{ Title }}", title)
     filled_in_template = filled_in_template.replace("{{ Content }}", html_string)
-    filled_in_template = filled_in_template.replace('href="/', f'href="{basepath}')
-    filled_in_template = filled_in_template.replace('src="/', f'src="{basepath}')
+    filled_in_template = filled_in_template.replace('href="/', 'href="' + basepath)
+    filled_in_template = filled_in_template.replace('src="/', 'src="' + basepath)
     with open(dest_path, "w") as output:
         _ = output.write(filled_in_template)
 
@@ -94,10 +94,9 @@ def copy_directory(origin: str, destiniation: str) -> None:
 # Copys the static content into the docs directory.
 # Generates html files from the content directory using the given html template into the docs directory
 def main():
+    base_path = "/"
     if len(sys.argv) > 1:
         base_path = sys.argv[1]
-    else:
-        base_path = "/"
     copy_directory(
         "./static/",
         "./docs/",
