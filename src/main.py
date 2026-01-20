@@ -94,10 +94,10 @@ def copy_directory(origin: str, destiniation: str) -> None:
 # Copys the static content into the docs directory.
 # Generates html files from the content directory using the given html template into the docs directory
 def main():
-    if len(sys.argv) < 1:
-        base_path = "/"
-    else:
+    if len(sys.argv) > 1:
         base_path = sys.argv[1]
+    else:
+        base_path = "/"
     copy_directory(
         "./static/",
         "./docs/",
