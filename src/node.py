@@ -36,6 +36,7 @@ class HTMLNode:
         else:
             return ""
 
+    # This class's string representation is just all of its feilds one after the other
     @override
     def __repr__(self) -> str:
         result = ""
@@ -53,6 +54,7 @@ class LeafNode(HTMLNode):
     ):
         super().__init__(tag, value, None, props)
 
+    # Converts this node to an HTML string. Surrounds the value with the tags of this node. If there is no tag it just returns the plain text of value.
     @override
     def to_html(self) -> str:
         if self.value is None:
@@ -60,8 +62,7 @@ class LeafNode(HTMLNode):
         elif self.tag is None:
             return self.value
         else:
-            result = f"<{self.tag}{self.props_to_html()}>{self.value}</{self.tag}>"
-            return result
+            return f"<{self.tag}{self.props_to_html()}>{self.value}</{self.tag}>"
 
     @override
     def __repr__(self):
@@ -78,7 +79,7 @@ class ParentNode(HTMLNode):
     ):
         super().__init__(tag, None, children, props)
 
-    # The main point of this class is this function. It formats all of the children's html into this parent node's
+    # The main point of this class is this function. It formats all of the children's html into an output string
     @override
     def to_html(self) -> str:
         if self.tag is None:
@@ -95,6 +96,7 @@ class ParentNode(HTMLNode):
 # ================ TextNode Section ======================
 
 
+# An enum to represent the type of text stored in a TextNode
 class TextType(Enum):
     TEXT = "text"
     BOLD_TEXT = "bold"
@@ -104,13 +106,14 @@ class TextType(Enum):
     IMAGE_TEXT = "image"
 
 
-# An intermediate node containing some inline text with its text type. If it's a link or image store it's url link
+# An intermediate node containing some inline text with its text type. If it's a link or image it's url link is stored
 class TextNode:
     def __init__(self, text: str, text_type: TextType, url: str | None = None):
         self.text: str = text
         self.text_type: TextType = text_type
         self.url: str | None = url
 
+    # Two text nodes are equal if all of their fields are equal. This is mainly used for testing.
     @override
     def __eq__(self, other: object) -> bool:
         if isinstance(other, TextNode):
@@ -121,12 +124,14 @@ class TextNode:
             )
         return False
 
+    # The string representation of a node is just it's text then text type and then url if there is one.
     @override
     def __repr__(self):
         return f"TextNode({self.text}, {self.text_type.value}, {self.url})"
 
 
 # =============== Block_type ===================
+# An enum to represent the type of a text block. This is used for grouping markdown text
 class Block_Type(Enum):
     HEADING = "heading"
     CODE = "code"
@@ -157,8 +162,7 @@ def text_node_to_html_node(text_node: TextNode) -> LeafNode:
         raise ValueError(f"invalid text type: {text_node.text_type}")
 
 
-# Takes a list of TextNodes and returns a new list that parses out the given text type on the given delimiter.
-# It keeps the text in order.
+# Takes a list of TextNodes and returns a new list that parses out the given text type on the given delimiter. It keeps the text in order.
 def split_nodes_delimiter(
     old_nodes: list[TextNode], delimiter: str, text_type: TextType
 ) -> list[TextNode]:
@@ -185,6 +189,9 @@ def split_nodes_delimiter(
 
 
 # Extracts links and images out of plain text nodes and returns a new list of of TextNodes
+# The logic for this one is a little complicated but basically it just loops character by character looking for the image or link delimiter
+# and then extracts the link and it's associated text.
+# I could have used the regex library but it was easier for me to do it manually and it's more efficient.
 # Preserves the order of the text.
 def split_image_or_link_nodes(
     old_nodes: list[TextNode], text_type: TextType
@@ -281,6 +288,8 @@ def text_to_textnodes(text: str) -> list[TextNode]:
 
 
 # ================= Block Helper Functions =======================
+
+
 # Takes a single block of markdown and returns the type of that block based on its properties.
 def block_to_block_type(markdown_block: str) -> Block_Type:
     blocks = markdown_block.split("\n")
@@ -308,7 +317,7 @@ def block_to_block_type(markdown_block: str) -> Block_Type:
     return Block_Type.PARAGRAPH
 
 
-# Take a string representing a full markdown document and splits it into a list of strings seperated by a blank line.
+# Takes a string representing a full markdown document and splits it into a list of strings seperated by a blank line.
 def markdown_to_blocks(markdown: str) -> list[str]:
     blocks = markdown.split("\n\n")
     filtered_blocks: list[str] = []
@@ -320,7 +329,11 @@ def markdown_to_blocks(markdown: str) -> list[str]:
     return filtered_blocks
 
 
-# converts a markdown document into a Tree of HTMLNodes.
+# Converts a markdown document into a Tree of HTMLNodes. The top of the tree is then returned.
+# It works by splitting the markdown into blocks and then parsing each block type appropriately.
+# The general flow is to split the block into lines of text. Then turn those lines of text into a list of text nodes.
+# Then turn those TextNodes into HTMLNodes. Then create a parent node for those HTMLNodes and at that to a list of block nodes.
+# Finally a Parent node is made for all the parent nodes from the list of block nodes and that's what's returned.
 def markdown_to_html_node(markdown: str) -> HTMLNode:
     markdown_blocks = markdown_to_blocks(markdown)
     block_nodes: list[HTMLNode] = []
@@ -402,7 +415,7 @@ def markdown_to_html_node(markdown: str) -> HTMLNode:
     return ParentNode("div", block_nodes, None)
 
 
-# Extracts the title of a markdown string and returns it as a string object
+# Extracts the title of a string of markdown text and returns it as a string.
 def extract_title(markdown_content: str) -> str:
     markdown_lines = markdown_content.split("\n")
     for line in markdown_lines:
