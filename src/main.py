@@ -4,6 +4,8 @@ import sys
 from node import markdown_to_html_node, extract_title
 
 
+# The base case for the generate_pages_recursive function.
+# Get the html from the markdown file. Fills in the template with the html and the title.
 def generate_page(
     from_path: str, template_path: str, dest_path: str, basepath: str
 ) -> None:
@@ -11,24 +13,31 @@ def generate_page(
         raise ValueError("No file at that location")
     if not os.path.exists(template_path):
         raise ValueError("No template at that location")
+
     print(f"Generating page {from_path} to {dest_path} using {template_path}")
     with open(from_path) as m_file:
         markdown_file = m_file.read()
     with open(template_path) as html_template:
         template_file = html_template.read()
+
     html_tree = markdown_to_html_node(markdown_file)
     html_string = html_tree.to_html()
+
     title = extract_title(markdown_file)
-    new_title = template_file.replace("{{ Title }}", title)
-    new_content = new_title.replace("{{ Content }}", html_string)
-    new_content = new_content.replace('href="/', f'href="{basepath}')
-    new_content = new_content.replace('src="/', f'href="{basepath}')
+    filled_in_template = template_file.replace("{{ Title }}", title)
+    filled_in_template = filled_in_template.replace("{{ Content }}", html_string)
+    filled_in_template = filled_in_template.replace('href="/', f'href="{basepath}')
+    filled_in_template = filled_in_template.replace('src="/', f'src="{basepath}')
     with open(dest_path, "w") as output:
-        _ = output.write(new_content)
+        _ = output.write(filled_in_template)
 
     return None
 
 
+# Generates HTML files in the given destination directory from the markdown files in the content directory.
+# The function searches through directories and if a markdown file is found it creates a new page.
+# If a directory is found it'll search through that directory as well.
+# If another file type is found it is ignored.
 def generate_pages_recursive(
     dir_path_content: str, template_path: str, dest_dir_path: str, basepath: str
 ) -> None:
@@ -81,11 +90,14 @@ def copy_directory(origin: str, destiniation: str) -> None:
             )
 
 
+# Gets the basepath from the command line and sets a default if there isn't one.
+# Copys the static content into the docs directory.
+# Generates html files from the content directory using the given html template into the docs directory
 def main():
-    if len(sys.argv) == 0:
+    if len(sys.argv) < 1:
         base_path = "/"
     else:
-        base_path = sys.argv[0]
+        base_path = sys.argv[1]
     copy_directory(
         "./static/",
         "./docs/",
@@ -93,4 +105,5 @@ def main():
     generate_pages_recursive("./content/", "./template.html", "./docs/", base_path)
 
 
+# Calls the main function
 main()
