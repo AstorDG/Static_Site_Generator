@@ -20,7 +20,7 @@ Markdown → Blocks → TextNodes → HTMLNodes → HTML Tree → HTML String
 
 ```
 ┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
-│   content/      │────▶│  Recursive Dir   │────▶│  Markdown Files │
+│   content/      │───▶│  Recursive Dir   │───▶│  Markdown Files │
 │   (source)      │     │   Traversal      │     │   Discovered    │
 └─────────────────┘     └──────────────────┘     └────────┬────────┘
                                                           │
