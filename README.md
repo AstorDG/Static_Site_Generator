@@ -19,34 +19,34 @@ Markdown → Blocks → TextNodes → HTMLNodes → HTML Tree → HTML String
 ## Program Flow
 
 ```
-┌─────────────────┐     ┌──────────────────┐     ┌─────────────────┐
-│   content/      │───▶│  Recursive Dir   │───▶│  Markdown Files │
-│   (source)      │     │   Traversal      │     │   Discovered    │
-└─────────────────┘     └──────────────────┘     └────────┬────────┘
-                                                          │
-                                                          ▼
-                        ┌──────────────────┐     ┌─────────────────┐
-                        │  Title Extract   │◀────│  Parse Markdown │
-                        │  (from h1 tags)  │     │                 │
-                        └────────┬─────────┘     └────────┬────────┘
-                                 │                        │
-                                 ▼                        ▼
-┌─────────────────┐     ┌─────────────────┐      ┌─────────────────┐
-│   Static/       │     │   template.html │      │  Generate HTML  │
-│   (assets)      │     │   (HTML shell)  │      │   (Node Tree)   │
-└────────┬────────┘     └────────┬────────┘      └────────┬────────┘
-         │                       │                        │
-         │                       ▼                        │
-         │              ┌──────────────────┐              │
-         └─────────────▶│   HTML Files     │◀─────────────┘
-                        │   (Generated)    │
-                        └────────┬─────────┘
-                                 │
-                                 ▼
-                        ┌──────────────────┐
-                        │      docs/       │
-                        │    (output)      │
-                        └──────────────────┘
++-----------------+     +------------------+     +-----------------+
+|   content/      |---->|  Recursive Dir   |---->|  Markdown Files |
+|   (source)      |     |   Traversal      |     |   Discovered    |
++-----------------+     +------------------+     +--------+--------+
+                                                          |
+                                                          v
+                        +------------------+     +-----------------+
+                        |  Title Extract   |<----|  Parse Markdown |
+                        |  (from h1 tags)  |     |                 |
+                        +--------+---------+     +--------+--------+
+                                 |                        |
+                                 v                        v
++-----------------+     +-----------------+      +-----------------+
+|   Static/       |     |   template.html |      |  Generate HTML  |
+|   (assets)      |     |   (HTML shell)  |      |   (Node Tree)   |
++--------+--------+     +--------+--------+      +--------+--------+
+         |                       |                        |
+         |                       v                        |
+         |              +------------------+              |
+         +------------->|   HTML Files     |<-------------+
+                        |   (Generated)    |
+                        +--------+---------+
+                                 |
+                                 v
+                        +------------------+
+                        |      docs/       |
+                        |    (output)      |
+                        +------------------+
 ```
 
 ### Execution Steps
@@ -65,32 +65,32 @@ The parsing process occurs in distinct stages:
 
 ```
 Raw Markdown
-     │
-     ▼
-┌─────────────────────────┐
-│  markdown_to_blocks()   │  → Split into block-level chunks
-│   (Block detection)     │     (headings, lists, paragraphs, etc.)
-└─────────────────────────┘
-     │
-     ▼
-┌─────────────────────────┐
-│  text_to_textnodes()    │  → Parse inline formatting
-│   (Inline parsing)      │     (bold, italic, code, links, images)
-└─────────────────────────┘
-     │
-     ▼
-┌─────────────────────────┐
-│  text_node_to_html_node │  → Convert to HTML representation
-│   (Node conversion)     │     (TextNode → LeafNode/ParentNode)
-└─────────────────────────┘
-     │
-     ▼
-┌─────────────────────────┐
-│  Parent/Leaf Nodes      │  → Build HTML tree structure
-│   (Tree assembly)       │     (Nest nodes into container elements)
-└─────────────────────────┘
-     │
-     ▼
+     |
+     v
++-------------------------+
+|  markdown_to_blocks()   |  → Split into block-level chunks
+|   (Block detection)     |     (headings, lists, paragraphs, etc.)
++-------------------------+
+     |
+     v
++-------------------------+
+|  text_to_textnodes()    |  → Parse inline formatting
+|   (Inline parsing)      |     (bold, italic, code, links, images)
++-------------------------+
+     |
+     v
++-------------------------+
+|  text_node_to_html_node |  → Convert to HTML representation
+|   (Node conversion)     |     (TextNode → LeafNode/ParentNode)
++-------------------------+
+     |
+     v
++-------------------------+
+|  Parent/Leaf Nodes      |  → Build HTML tree structure
+|   (Tree assembly)       |     (Nest nodes into container elements)
++-------------------------+
+     |
+     v
   HTML String (via to_html())
 ```
 
